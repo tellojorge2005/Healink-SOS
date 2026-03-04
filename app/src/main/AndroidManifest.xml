@@ -41,7 +41,10 @@
             android:name=".AddContactActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-
+        <activity
+            android:name=".AddMedicineActivity"
+            android:label="Nueva Medicina"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

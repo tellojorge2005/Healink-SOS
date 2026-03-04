@@ -41,6 +41,9 @@ public class DashboardActivity extends AppCompatActivity {
     private boolean monitoreoActivo = true;
     private final OkHttpClient client = new OkHttpClient();
 
+    // IP del servidor (POR AHORA ES CON RED LOCAL)
+    private final String SERVER_URL = "http://0.0.0.0:3000";
+
     private LinearLayout layoutHome, layoutContacts, layoutMeds;
 
     private Runnable monitoreoLoop = new Runnable() {
@@ -79,21 +82,29 @@ public class DashboardActivity extends AppCompatActivity {
         solicitarPermisos();
         configurarMapa();
 
-        // Botón SOS
+        // --- BOTONES PRINCIPALES ---
         MaterialButton btnSOS = findViewById(R.id.btnSOS);
         btnSOS.setOnClickListener(v -> {
             dynamoSimulator.enviarDatosSimulados(idUsuarioActual, true);
             Toast.makeText(this, "¡ALERTA SOS ENVIADA A AWS!", Toast.LENGTH_LONG).show();
         });
 
-        // BOTÓN: Abrir Formulario de Contactos
-        MaterialButton btnAddContact = findViewById(R.id.btnAddContact);
-        btnAddContact.setOnClickListener(v -> {
+        // BOTÓN: Añadir Contactos
+        findViewById(R.id.btnAddContact).setOnClickListener(v -> {
             Intent intent = new Intent(DashboardActivity.this, AddContactActivity.class);
             intent.putExtra("id_usuario", idUsuarioActual);
             startActivity(intent);
         });
 
+        // BOTÓN NUEVO: Añadir Medicinas (Se agrega al layout_meds_content)
+        MaterialButton btnAddMed = findViewById(R.id.btnAddMed);
+        btnAddMed.setOnClickListener(v -> {
+            Intent intent = new Intent(DashboardActivity.this, AddMedicineActivity.class);
+            intent.putExtra("id_usuario", idUsuarioActual);
+            startActivity(intent);
+        });
+
+        // --- NAVEGACIÓN INFERIOR ---
         BottomNavigationView nav = findViewById(R.id.bottom_navigation);
         nav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -108,6 +119,7 @@ public class DashboardActivity extends AppCompatActivity {
                 obtenerContactosSQL();
             } else if (id == R.id.nav_meds) {
                 layoutMeds.setVisibility(View.VISIBLE);
+                obtenerMedicamentosSQL(); // <--- LLAMADA INTEGRADA
             }
             return true;
         });
@@ -115,26 +127,20 @@ public class DashboardActivity extends AppCompatActivity {
         handler.post(monitoreoLoop);
     }
 
+    // --- MÓDULO DE CONTACTOS ---
     private void obtenerContactosSQL() {
-        String url = "http://0.0.0.0:3000/contactos/" + idUsuarioActual; // SE añade IP
-
+        String url = SERVER_URL + "/contactos/" + idUsuarioActual;
         client.newCall(new Request.Builder().url(url).build()).enqueue(new Callback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        final String responseData = response.body().string();
-                        final JSONArray array = new JSONArray(responseData);
+                        final JSONArray array = new JSONArray(response.body().string());
                         runOnUiThread(() -> {
-                            try {
-                                LinearLayout listContainer = findViewById(R.id.list_contacts_container);
-                                listContainer.removeAllViews();
-                                for (int i = 0; i < array.length(); i++) {
-                                    JSONObject obj = array.getJSONObject(i);
-                                    inflarContacto(obj, listContainer);
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+                            LinearLayout listContainer = findViewById(R.id.list_contacts_container);
+                            listContainer.removeAllViews();
+                            for (int i = 0; i < array.length(); i++) {
+                                try { inflarContacto(array.getJSONObject(i), listContainer); } catch (JSONException e) { e.printStackTrace(); }
                             }
                         });
                     } catch (Exception e) { e.printStackTrace(); }
@@ -146,16 +152,46 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void inflarContacto(JSONObject obj, LinearLayout container) throws JSONException {
         View view = getLayoutInflater().inflate(R.layout.item_contacto, null);
-        TextView nombre = view.findViewById(R.id.tvNombreCont);
-        TextView tel = view.findViewById(R.id.tvTelCont);
-        TextView prio = view.findViewById(R.id.tvPrioridadIcon);
-
-        nombre.setText(obj.getString("nombre_contacto"));
-        tel.setText(obj.getString("telefono"));
-        prio.setText(obj.getString("prioridad"));
+        ((TextView)view.findViewById(R.id.tvNombreCont)).setText(obj.getString("nombre_contacto"));
+        ((TextView)view.findViewById(R.id.tvTelCont)).setText(obj.getString("telefono"));
+        ((TextView)view.findViewById(R.id.tvPrioridadIcon)).setText(obj.getString("prioridad"));
         container.addView(view);
     }
 
+    // --- MÓDULO DE MEDICINAS (NUEVO) ---
+    private void obtenerMedicamentosSQL() {
+        String url = SERVER_URL + "/medicamentos/" + idUsuarioActual;
+        client.newCall(new Request.Builder().url(url).build()).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        final JSONArray array = new JSONArray(response.body().string());
+                        runOnUiThread(() -> {
+                            LinearLayout container = findViewById(R.id.list_meds_container);
+                            container.removeAllViews();
+                            for (int i = 0; i < array.length(); i++) {
+                                try { inflarMedicina(array.getJSONObject(i), container); } catch (JSONException e) { e.printStackTrace(); }
+                            }
+                        });
+                    } catch (Exception e) { e.printStackTrace(); }
+                }
+            }
+            @Override public void onFailure(Call call, IOException e) {}
+        });
+    }
+
+    private void inflarMedicina(JSONObject obj, LinearLayout container) throws JSONException {
+        View view = getLayoutInflater().inflate(R.layout.item_medicinas, null);
+        String nombre = obj.getString("nombre_farmaco"); // Según tu SQL en la imagen
+        ((TextView)view.findViewById(R.id.tvNombreMedItem)).setText(nombre);
+        ((TextView)view.findViewById(R.id.tvMedIcon)).setText(nombre.substring(0, 1).toUpperCase());
+        ((TextView)view.findViewById(R.id.tvInfoMedItem)).setText(obj.getString("dosis") + " - Cada " + obj.getString("frecuencia_horas") + "h");
+        ((TextView)view.findViewById(R.id.tvHoraMedItem)).setText(obj.getString("hora_programada").substring(0, 5));
+        container.addView(view);
+    }
+
+    // --- LÓGICA DE MAPA ---
     private void configurarMapa() {
         mapView = findViewById(R.id.mapView);
         mapView.setMultiTouchControls(true);
