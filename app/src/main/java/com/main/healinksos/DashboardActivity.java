@@ -152,9 +152,17 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void inflarContacto(JSONObject obj, LinearLayout container) throws JSONException {
         View view = getLayoutInflater().inflate(R.layout.item_contacto, null);
+        int idContacto = obj.getInt("id_contacto"); // Asegúrate que el SQL devuelva el ID
+
         ((TextView)view.findViewById(R.id.tvNombreCont)).setText(obj.getString("nombre_contacto"));
         ((TextView)view.findViewById(R.id.tvTelCont)).setText(obj.getString("telefono"));
         ((TextView)view.findViewById(R.id.tvPrioridadIcon)).setText(obj.getString("prioridad"));
+
+        // LÓGICA DE BORRADO
+        view.findViewById(R.id.btnEliminarItem).setOnClickListener(v -> {
+            eliminarRecursoAPI("/contactos/" + idContacto, this::obtenerContactosSQL);
+        });
+
         container.addView(view);
     }
 
@@ -183,11 +191,17 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void inflarMedicina(JSONObject obj, LinearLayout container) throws JSONException {
         View view = getLayoutInflater().inflate(R.layout.item_medicinas, null);
-        String nombre = obj.getString("nombre_farmaco"); // Según tu SQL en la imagen
+        int idMed = obj.getInt("id_medicina");
+        String nombre = obj.getString("nombre_farmaco");
+
         ((TextView)view.findViewById(R.id.tvNombreMedItem)).setText(nombre);
-        ((TextView)view.findViewById(R.id.tvMedIcon)).setText(nombre.substring(0, 1).toUpperCase());
         ((TextView)view.findViewById(R.id.tvInfoMedItem)).setText(obj.getString("dosis") + " - Cada " + obj.getString("frecuencia_horas") + "h");
-        ((TextView)view.findViewById(R.id.tvHoraMedItem)).setText(obj.getString("hora_programada").substring(0, 5));
+
+        // LÓGICA DE BORRADO
+        view.findViewById(R.id.btnEliminarItem).setOnClickListener(v -> {
+            eliminarRecursoAPI("/medicamentos/" + idMed, this::obtenerMedicamentosSQL);
+        });
+
         container.addView(view);
     }
 
@@ -221,5 +235,27 @@ public class DashboardActivity extends AppCompatActivity {
         super.onDestroy();
         monitoreoActivo = false;
         handler.removeCallbacks(monitoreoLoop);
+    }
+    private void eliminarRecursoAPI(String endpoint, Runnable onSuccess) {
+        Request request = new Request.Builder()
+                .url(SERVER_URL + endpoint)
+                .delete()
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                if (response.isSuccessful()) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(DashboardActivity.this, "Eliminado con éxito", Toast.LENGTH_SHORT).show();
+                        onSuccess.run(); // Refresca la lista automáticamente
+                    });
+                }
+            }
+            @Override
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(() -> Toast.makeText(DashboardActivity.this, "Error al eliminar", Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 }
