@@ -5,10 +5,34 @@
     android:layout_height="match_parent"
     android:background="#F3E5F5">
 
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="end|center_vertical"
+        android:background="#F3E5F5">
+
+        <TextView
+            android:id="@+id/tvUserInitial"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/circle_purple"
+            android:gravity="center"
+            android:text="?"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:clickable="true"
+            android:focusable="true"/>
+    </LinearLayout>
+
     <FrameLayout
         android:id="@+id/container_fragments"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/topBar"
         android:layout_above="@id/bottom_navigation">
 
         <LinearLayout
@@ -163,7 +187,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="-1dp"
         android:background="#FFFFFF"
         app:elevation="16dp"
         app:itemIconTint="#6200EE"

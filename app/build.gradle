@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
 }
+
 android {
     namespace 'com.main.healinksos'
     compileSdk {
@@ -18,18 +19,28 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // 1. ACTIVAR BUILDCONFIG
+    buildFeatures {
+        buildConfig true
+    }
+
     buildTypes {
+        debug {
+            //Sustituye esta IP por la de tu compu real
+            buildConfigField "String", "API_BASE_URL", "\"http://0.0.0.0\""
+        }
         release {
+            buildConfigField "String", "API_BASE_URL", "\"https://servidor-produccion.com\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
 }
+
 dependencies {
     implementation libs.appcompat
     implementation libs.material
@@ -37,7 +48,7 @@ dependencies {
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
     implementation 'com.amazonaws:aws-android-sdk-core:2.81.1'
-    implementation 'com.amazonaws:aws-android-sdk-ddb:2.81.1' // <-- Aquí estaba el error, es "ddb"
+    implementation 'com.amazonaws:aws-android-sdk-ddb:2.81.1'
     implementation 'com.amazonaws:aws-android-sdk-ddb-mapper:2.81.1'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'org.osmdroid:osmdroid-android:6.1.18'

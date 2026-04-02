@@ -7,6 +7,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
 import okhttp3.Call;
@@ -20,14 +21,15 @@ import okhttp3.Response;
 public class AddContactActivity extends AppCompatActivity {
 
     private final OkHttpClient client = new OkHttpClient();
-    private int idUsuario;
+    private int idUsuarioActual; // Estandarizado
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_contact);
 
-        idUsuario = getIntent().getIntExtra("id_usuario", 0);
+        // Obtenemos el ID enviado desde el Dashboard
+        idUsuarioActual = getIntent().getIntExtra("id_usuario", 0);
 
         TextInputEditText etNombre = findViewById(R.id.etNombreCont);
         TextInputEditText etTel = findViewById(R.id.etTelCont);
@@ -43,7 +45,7 @@ public class AddContactActivity extends AppCompatActivity {
             String prio = autoPrio.getText().toString();
 
             if (nom.isEmpty() || tel.isEmpty() || prio.isEmpty()) {
-                Toast.makeText(this, "Llena todos los campos", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Llene todos los campos", Toast.LENGTH_SHORT).show();
                 return;
             }
             enviarContactoAPI(nom, tel, Integer.parseInt(prio));
@@ -53,15 +55,16 @@ public class AddContactActivity extends AppCompatActivity {
     }
 
     private void enviarContactoAPI(String nom, String tel, int prio) {
-        String url = "http://0.0.0.0:3000/contactos"; //SE AÑADE IP
+        // CORRECCIÓN: Para el POST, la ruta es limpia. El ID va en el JSON.
+        String url = BuildConfig.API_BASE_URL + ":3002/admin/contacto";
 
         JSONObject json = new JSONObject();
         try {
-            json.put("id_usuario", idUsuario);
-            json.put("nombre", nom);
+            json.put("idUsuario", idUsuarioActual); // Usamos la variable estandarizada
+            json.put("nombreContacto", nom);
             json.put("telefono", tel);
             json.put("prioridad", prio);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (JSONException e) { e.printStackTrace(); }
 
         RequestBody body = RequestBody.create(json.toString(),
                 MediaType.parse("application/json; charset=utf-8"));
@@ -73,11 +76,10 @@ public class AddContactActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
                 if (response.isSuccessful()) {
                     runOnUiThread(() -> {
-                        Toast.makeText(AddContactActivity.this, "¡Contacto Guardado!", Toast.LENGTH_SHORT).show();
-                        setResult(RESULT_OK);
+                        Toast.makeText(AddContactActivity.this, "Contacto guardado", Toast.LENGTH_SHORT).show();
                         finish();
                     });
                 }
