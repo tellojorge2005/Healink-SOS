@@ -57,7 +57,6 @@ public class LoginActivity extends AppCompatActivity {
      * Transmite las credenciales al servidor para la autenticación del usuario.
      */
     private void validarLoginConAPI(String email, String password) {
-        // Se asume que BuildConfig.API_BASE_URL contiene la dirección base (ej. http://10.0.2.2:3001/auth)
         String url = BuildConfig.API_BASE_URL + ":3001/auth/login";
 
         JSONObject json = new JSONObject();

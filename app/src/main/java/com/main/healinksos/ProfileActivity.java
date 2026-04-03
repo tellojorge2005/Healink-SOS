@@ -1,10 +1,8 @@
 package com.main.healinksos;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
@@ -148,11 +146,7 @@ public class ProfileActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     if (response.isSuccessful()) {
                         Toast.makeText(ProfileActivity.this, "Cuenta eliminada correctamente", Toast.LENGTH_LONG).show();
-                        // Asumiendo que tu pantalla inicial de login se llama LoginActivity
-                        // Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-                        // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        // startActivity(intent);
-                        finish(); // Si aún no tienes LoginActivity
+                        finish();
                     } else {
                         Toast.makeText(ProfileActivity.this, "Error al eliminar la cuenta", Toast.LENGTH_SHORT).show();
                     }

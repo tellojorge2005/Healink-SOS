@@ -47,9 +47,6 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
-    implementation 'com.amazonaws:aws-android-sdk-core:2.81.1'
-    implementation 'com.amazonaws:aws-android-sdk-ddb:2.81.1'
-    implementation 'com.amazonaws:aws-android-sdk-ddb-mapper:2.81.1'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'org.osmdroid:osmdroid-android:6.1.18'
 }

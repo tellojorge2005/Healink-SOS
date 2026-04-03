@@ -55,7 +55,6 @@ public class AddContactActivity extends AppCompatActivity {
     }
 
     private void enviarContactoAPI(String nom, String tel, int prio) {
-        // CORRECCIÓN: Para el POST, la ruta es limpia. El ID va en el JSON.
         String url = BuildConfig.API_BASE_URL + ":3002/admin/contacto";
 
         JSONObject json = new JSONObject();

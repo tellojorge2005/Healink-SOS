@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.config.Configuration;
+import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import java.io.IOException;
@@ -40,6 +41,9 @@ public class DashboardActivity extends AppCompatActivity {
     private final OkHttpClient client = new OkHttpClient();
 
     private LinearLayout layoutHome, layoutContacts, layoutMeds;
+
+    // Nuestro nuevo motor de telemetría
+    private NoSQLSimulator simuladorTelemetria;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,10 +77,6 @@ public class DashboardActivity extends AppCompatActivity {
                     startActivity(intent);
                 } else if (item.getTitle().equals("Cerrar Sesión")) {
                     Toast.makeText(DashboardActivity.this, "Cerrando sesión...", Toast.LENGTH_SHORT).show();
-                    // Descomenta esto cuando tengas tu LoginActivity listo para evitar que regresen con el botón back
-                    // Intent intent = new Intent(DashboardActivity.this, LoginActivity.class);
-                    // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    // startActivity(intent);
                     finish();
                 }
                 return true;
@@ -114,6 +114,58 @@ public class DashboardActivity extends AppCompatActivity {
             }
             return true;
         });
+
+        simuladorTelemetria = new NoSQLSimulator();
+
+        // 1. Iniciar los latidos normales en segundo plano
+        simuladorTelemetria.iniciarSimulacionNormal(idUsuarioActual, (bpm, lat, lng) -> {
+            runOnUiThread(() -> {
+                tvBpm.setText(bpm + " BPM");
+                tvBpm.setTextColor(getResources().getColor(android.R.color.holo_purple)); // Regresa a color normal
+                actualizarMarcadorMapa(lat, lng);
+            });
+        });
+
+        // 2. Configurar el botón de pánico
+        View btnSosEmergencia = findViewById(R.id.btnSOS);
+        if (btnSosEmergencia != null) {
+            btnSosEmergencia.setOnClickListener(v -> {
+                Toast.makeText(this, "¡ALERTA SOS ENVIADA!", Toast.LENGTH_LONG).show();
+
+                simuladorTelemetria.dispararAlertaSOS(idUsuarioActual, (bpm, lat, lng) -> {
+                    runOnUiThread(() -> {
+                        tvBpm.setText(bpm + " BPM ⚠️");
+                        tvBpm.setTextColor(getResources().getColor(android.R.color.holo_red_dark)); // Pone el BPM en rojo
+                        actualizarMarcadorMapa(lat, lng);
+                    });
+                });
+            });
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Matamos el ciclo infinito del simulador al salir de la app
+        if (simuladorTelemetria != null) {
+            simuladorTelemetria.detenerSimulacion();
+        }
+    }
+
+    private void actualizarMarcadorMapa(double lat, double lng) {
+        if (mapView == null) return;
+
+        GeoPoint punto = new GeoPoint(lat, lng);
+        mapView.getController().setCenter(punto);
+
+        if (userMarker == null) {
+            userMarker = new Marker(mapView);
+            userMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            userMarker.setTitle("Ubicación del Usuario");
+            mapView.getOverlays().add(userMarker);
+        }
+        userMarker.setPosition(punto);
+        mapView.invalidate(); // Refresca el mapa visualmente
     }
 
     private void cargarInicialUsuario(TextView tvAvatar) {
@@ -133,16 +185,12 @@ public class DashboardActivity extends AppCompatActivity {
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        runOnUiThread(() -> Toast.makeText(DashboardActivity.this, "Error leyendo el nombre", Toast.LENGTH_SHORT).show());
                     }
-                } else {
-                    runOnUiThread(() -> Toast.makeText(DashboardActivity.this, "Error API Perfil: " + response.code(), Toast.LENGTH_SHORT).show());
                 }
             }
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(DashboardActivity.this, "Falla de conexión al user-service", Toast.LENGTH_LONG).show());
             }
         });
     }
