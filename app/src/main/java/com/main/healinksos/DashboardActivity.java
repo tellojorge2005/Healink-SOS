@@ -121,7 +121,7 @@ public class DashboardActivity extends AppCompatActivity {
         simuladorTelemetria.iniciarSimulacionNormal(idUsuarioActual, (bpm, lat, lng) -> {
             runOnUiThread(() -> {
                 tvBpm.setText(bpm + " BPM");
-                tvBpm.setTextColor(getResources().getColor(android.R.color.holo_purple)); // Regresa a color normal
+                tvBpm.setTextColor(android.graphics.Color.parseColor("#6200EE")); // Corrección del color morado
                 actualizarMarcadorMapa(lat, lng);
             });
         });

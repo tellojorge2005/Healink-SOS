@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HeaLink SOS</string>
+    <string name="app_name">HeaLinkSOS</string>
     <string-array name="tipos_sangre">
         <item>A+</item>
         <item>A-</item>

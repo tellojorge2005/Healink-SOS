@@ -5,34 +5,11 @@
     android:layout_height="match_parent"
     android:background="#F3E5F5">
 
-    <LinearLayout
-        android:id="@+id/topBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="end|center_vertical"
-        android:background="#F3E5F5">
-
-        <TextView
-            android:id="@+id/tvUserInitial"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/circle_purple"
-            android:gravity="center"
-            android:text="?"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:clickable="true"
-            android:focusable="true"/>
-    </LinearLayout>
-
     <FrameLayout
         android:id="@+id/container_fragments"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/topBar"
+        android:layout_alignParentTop="true"
         android:layout_above="@id/bottom_navigation">
 
         <LinearLayout
@@ -48,13 +25,14 @@
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="6dp"
+                android:layout_marginTop="60dp"
                 android:layout_marginBottom="24dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp"
+                    android:padding="16dp"
                     android:gravity="center">
 
                     <TextView
@@ -181,6 +159,24 @@
         </LinearLayout>
 
     </FrameLayout>
+
+    <TextView
+        android:id="@+id/tvUserInitial"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/circle_purple"
+        android:elevation="8dp"
+        android:gravity="center"
+        android:text="?"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:clickable="true"
+        android:focusable="true"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
