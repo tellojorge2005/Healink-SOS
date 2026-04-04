@@ -1,5 +1,6 @@
 package com.main.healinksos;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -45,7 +46,6 @@ public class ProfileActivity extends AppCompatActivity {
         etHistorial = findViewById(R.id.etProfileHistorial);
         tvAvatarBig = findViewById(R.id.tvProfileAvatarBig);
 
-        // Configurar la lista de sangre
         String[] tiposSangre = new String[]{"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, tiposSangre);
         etSangre.setAdapter(adapter);
@@ -76,15 +76,12 @@ public class ProfileActivity extends AppCompatActivity {
                         String fechaLocal = convertirUTCA_Local(fechaUTC);
 
                         runOnUiThread(() -> {
-                            // Llenar datos
                             etNombre.setText(nombre);
                             etFecha.setText(fechaLocal);
-                            // Setear el dropdown sin disparar el filtro
                             etSangre.setText(tipoSangre.equals("null") ? "" : tipoSangre, false);
                             etAlergias.setText(alergias.equals("null") ? "" : alergias);
                             etHistorial.setText(historial.equals("null") ? "" : historial);
 
-                            // Llenar el Avatar gigante
                             if (!nombre.isEmpty()) {
                                 tvAvatarBig.setText(nombre.substring(0, 1).toUpperCase());
                             }
@@ -146,7 +143,9 @@ public class ProfileActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     if (response.isSuccessful()) {
                         Toast.makeText(ProfileActivity.this, "Cuenta eliminada correctamente", Toast.LENGTH_LONG).show();
-                        finish();
+                        Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
                     } else {
                         Toast.makeText(ProfileActivity.this, "Error al eliminar la cuenta", Toast.LENGTH_SHORT).show();
                     }
