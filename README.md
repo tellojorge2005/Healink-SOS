@@ -18,4 +18,4 @@ HeaLink SOS es una solución integral de salud que combina movilidad, backend es
 * **Backend API**: TypeScript con Node.js, Express y TypeORM.
 * **Comunicaciones**: Twilio API para la gestión de mensajes SMS y llamadas de voz.
 * **Bases de datos**: Oracle DB para el manejo de información relacional y Oracle NoSQL para el almacenamiento de alta velocidad de telemetría.
-* **DevOps e Infraestructura**: Despliegue preparado para Red Hat Enterprise Linux (RHEL), Docker y Kubernetes.
+* **DevOps e Infraestructura**: Despliegue preparado para Ubuntu Sever, Docker y Kubernetes.
